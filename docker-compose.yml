@@ -6,6 +6,8 @@ services:
     image: postgres:latest
     container_name: postgres
     environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
       - database_dockerizing:/var/lib/postgresql/data
@@ -17,6 +19,11 @@ services:
     build: .
     container_name: backend
     environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
       - PORT=8000
     volumes:
       - ./src:/app/src

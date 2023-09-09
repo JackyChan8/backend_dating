@@ -45,6 +45,16 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Running Docker the app
+```bash
+$ sudo docker-compose up --build
+
+# Swagger: http://localhost:8000/api
+# PgAdmin: http://localhost:5050/login
+```
+
+
+
 ## Test
 
 ```bash
