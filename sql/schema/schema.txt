@@ -1,0 +1,3 @@
+init.down.sql - для удаления таблиц
+init.up.sql - для создания таблиц
+initFunction.up.sql - чтобы быстро создать функции plpgsql
