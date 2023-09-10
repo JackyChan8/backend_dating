@@ -1,9 +1,9 @@
-export interface UsersInterface {
+export interface AuthInterface {
   email: string;
   password: string;
 }
 
-export interface UsersSignUpResponse {
+export interface AuthSignUpRes {
   status: number;
   message: string;
 }
