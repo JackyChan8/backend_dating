@@ -1,7 +1,7 @@
-import { Body, Controller, HttpException, Post } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpCode, Post } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto/auth.dto';
+import { SignInDto, SignInJwtDto, SignUpDto } from './dto/auth.dto';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('auth')
@@ -23,14 +23,25 @@ export class AuthController {
   })
   @Post('sign-up')
   async signUp(@Body() body: SignUpDto): Promise<HttpException> {
-    const res = await this.authService.signUp(body);
-    throw new HttpException(res.message, res.status);
+    return await this.authService.signUp(body);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'The user has successfully authenticated',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Wrong email or password',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User with this email does not exist',
+  })
   @Post('sign-in')
-  async signIn(@Body() body: SignInDto): Promise<HttpException> {
-    const res = await this.authService.signIn(body);
-    throw new HttpException(res.message, res.status);
+  @HttpCode(200)
+  async signIn(@Body() body: SignInDto): Promise<SignInJwtDto | HttpException> {
+    return await this.authService.signIn(body);
   }
 
   @Post('logout')

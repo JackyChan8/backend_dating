@@ -8,3 +8,7 @@ export class SignInDto {
   password: string;
   confirm_password: string;
 }
+
+export class SignInJwtDto {
+  access_token: string;
+}

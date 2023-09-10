@@ -25,6 +25,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
       - PORT=8000
+      # JWT
+      - SECRET_JWT=8X1RW3Bt3eRtTgk1O7JVKXj4DbbXua5CGOXWWulCibNWALC
     volumes:
       - ./src:/app/src
     ports:

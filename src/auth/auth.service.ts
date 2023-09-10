@@ -1,19 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 
 import {
   AuthInterface,
   AuthSignInInterface,
-  AuthResponse,
+  AuthSignInJwt,
 } from './interfaces/auth.interface';
 
 import { hashPassword, checkPassword } from 'src/utils/bcrypt/bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
-  async signUp(data: AuthInterface): Promise<AuthResponse> {
+  async signUp(data: AuthInterface): Promise<HttpException> {
     const checkExist = await this.usersService.checkExistUser(data.email);
     if (!checkExist) {
       // Hash Password
@@ -21,19 +25,21 @@ export class AuthService {
       // Create Model
       const user = await this.usersService.create(data.email, hashedPassword);
       if (user) {
-        return { status: 201, message: 'Success create user' };
+        throw new HttpException('User successfully registered.', 201);
       } else {
-        return {
-          status: 500,
-          message: 'An error occurred while creating the user',
-        };
+        throw new HttpException(
+          'An error occurred while creating the user',
+          500,
+        );
       }
     } else {
-      return { status: 409, message: 'User with this email already exists' };
+      throw new HttpException('User with this email already exists', 409);
     }
   }
 
-  async signIn(data: AuthSignInInterface): Promise<AuthResponse> {
+  async signIn(
+    data: AuthSignInInterface,
+  ): Promise<AuthSignInJwt | HttpException> {
     // Check Exist User
     const user = await this.usersService.findOne(data.email);
     if (user) {
@@ -44,13 +50,14 @@ export class AuthService {
         user.password,
       );
       if (!checkRes) {
-        return { status: 401, message: 'Wrong email or password' };
+        throw new HttpException('Wrong email or password', 401);
       } else {
         // Generate JWT
-        return { status: 200, message: '111' };
+        const payload = { sub: user.id, email: user.email };
+        return { access_token: await this.jwtService.signAsync(payload) };
       }
     } else {
-      return { status: 404, message: 'User with this email does not exist' };
+      throw new HttpException('User with this email does not exist', 404);
     }
   }
 
