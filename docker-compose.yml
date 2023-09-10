@@ -13,7 +13,7 @@ services:
       - database_dockerizing:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d/
     ports:
-      - '5432:5432'
+      - '1234:5432'
 
   app:
     build: .
