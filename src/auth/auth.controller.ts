@@ -1,7 +1,7 @@
 import { Body, Controller, HttpException, Post } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/auth.dto';
+import { SignInDto, SignUpDto } from './dto/auth.dto';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('auth')
@@ -28,8 +28,9 @@ export class AuthController {
   }
 
   @Post('sign-in')
-  async signIn() {
-    await this.authService.signIn();
+  async signIn(@Body() body: SignInDto): Promise<HttpException> {
+    const res = await this.authService.signIn(body);
+    throw new HttpException(res.message, res.status);
   }
 
   @Post('logout')

@@ -36,4 +36,10 @@ export class UsersService {
       return false;
     }
   }
+
+  async findOne(email: string): Promise<Users | null> {
+    return this.usersRepository.findOneBy({
+      email: email,
+    });
+  }
 }

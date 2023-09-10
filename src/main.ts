@@ -9,7 +9,6 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Backend Dating')
     .setVersion('1.0')
-    .addTag('cats')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -10,6 +10,7 @@ export async function checkPassword(
   confirmPass: string,
   hash: string,
 ): Promise<boolean> {
+  console.log('checkPassword: ', password, confirmPass, hash);
   // Checking the same passwords
   if (password === confirmPass) {
     const isMatch = await bcrypt.compare(password, hash);
