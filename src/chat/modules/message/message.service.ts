@@ -18,6 +18,23 @@ export class MessageService {
     private usersService: UsersService,
   ) {}
 
+  async getAll(dialogID: number): Promise<Messages | Messages[]> {
+    return await this.messageRepository.find({
+      where: { dialog: { id: dialogID } },
+      relations: ['author'],
+      select: {
+        id: true,
+        text: true,
+        read: true,
+        created_at: true,
+        author: { id: true },
+      },
+      order: {
+        created_at: 'ASC',
+      },
+    });
+  }
+
   async create(data: MessageInterface): Promise<MessageResInterface> {
     // Check Exist Dialog
     const dialog = await this.dialogService.getDialog(data.dialog);

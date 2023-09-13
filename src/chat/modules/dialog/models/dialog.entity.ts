@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 import { Users } from 'src/users/models/users.entity';
 
@@ -13,12 +7,10 @@ export class Dialogs {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Users)
-  @JoinColumn()
+  @ManyToOne(() => Users)
   author: Users;
 
-  @OneToOne(() => Users)
-  @JoinColumn()
+  @ManyToOne(() => Users)
   partner: Users;
 
   @Column({
@@ -26,4 +18,8 @@ export class Dialogs {
     type: 'text',
   })
   lastMessage: string;
+
+  async length() {
+    return Dialogs.length;
+  }
 }

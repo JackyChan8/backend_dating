@@ -41,6 +41,21 @@ export class DialogService {
     return this.dialogRepository.findOneBy({ id: dialogID });
   }
 
+  async getAll(userID: number): Promise<Dialogs | Dialogs[]> {
+    return await this.dialogRepository.find({
+      where: [{ author: { id: userID } }, { partner: { id: userID } }],
+      relations: ['author', 'partner'],
+      select: {
+        author: {
+          id: true,
+        },
+        partner: {
+          id: true,
+        },
+      },
+    });
+  }
+
   async update(dialogID: number, message: string) {
     const post = (
       await this.dialogRepository.update(

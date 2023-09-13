@@ -1,4 +1,12 @@
-import { Controller, Request, Body, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Request,
+  Body,
+  Post,
+  Param,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -16,6 +24,47 @@ import { CreateChatDto, CreateMessageDto } from './dto/chat.dto';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  // Get Data API
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Dialogs successfully received',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Dialogs does not exist',
+  })
+  @ApiOperation({ summary: 'Get Chats' })
+  @ApiBearerAuth('JWT-auth')
+  @Get('get/dialogs')
+  async getDialogs(@Request() req: any) {
+    return this.chatService.getManyDialogs(req.user.sub);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Messages successfully received',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Messages does not exist',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiOperation({ summary: 'Get Messages' })
+  @ApiBearerAuth('JWT-auth')
+  @Get('get/dialog/:id')
+  async getMessages(@Request() req: any, @Param('id') dialogID: number) {
+    return this.chatService.getMessages({
+      dialogID: dialogID,
+      userID: req.user.sub,
+    });
+  }
+
+  // Create API
   @UseGuards(AuthGuard)
   @ApiResponse({
     status: 200,

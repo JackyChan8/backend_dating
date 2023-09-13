@@ -31,16 +31,16 @@ export class AuthService {
         const user = await this.usersService.create(data.email, hashedPassword);
         if (user) {
           // Send Mail
-          const resMail = await this.mailService.sendActivationMail({
-            link: 'https://google.com/',
-            to: data.email,
-          });
-          if (!resMail) {
-            throw new HttpException(
-              'The user has successfully registered, but no confirmation message has been sent.',
-              200,
-            );
-          }
+          // const resMail = await this.mailService.sendActivationMail({
+          //   link: 'https://google.com/',
+          //   to: data.email,
+          // });
+          // if (!resMail) {
+          //   throw new HttpException(
+          //     'The user has successfully registered, but no confirmation message has been sent.',
+          //     200,
+          //   );
+          // }
           throw new HttpException('User successfully registered.', 201);
         } else {
           throw new HttpException(

@@ -34,4 +34,8 @@ export class Messages {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  async length() {
+    return Messages.length;
+  }
 }

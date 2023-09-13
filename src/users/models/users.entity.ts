@@ -7,8 +7,6 @@ import {
 } from 'typeorm';
 import { Length, IsNotEmpty, IsEmail } from 'class-validator';
 
-import * as bcrypt from 'bcrypt';
-
 @Entity()
 export class Users {
   @PrimaryGeneratedColumn()
