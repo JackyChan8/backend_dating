@@ -9,7 +9,7 @@ import {
 import { Users } from 'src/users/models/users.entity';
 
 @Entity()
-export class Dialog {
+export class Dialogs {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,7 +22,7 @@ export class Dialog {
   partner: Users;
 
   @Column({
-    name: 'last_message',
+    name: 'lastMessage',
     type: 'text',
   })
   lastMessage: string;

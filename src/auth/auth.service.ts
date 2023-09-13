@@ -9,28 +9,47 @@ import {
 
 import { hashPassword, checkPassword } from 'src/utils/bcrypt/bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async signUp(data: AuthInterface): Promise<HttpException> {
     const checkExist = await this.usersService.checkExistUser(data.email);
     if (!checkExist) {
-      // Hash Password
-      const hashedPassword = await hashPassword(data.password);
-      // Create Model
-      const user = await this.usersService.create(data.email, hashedPassword);
-      if (user) {
-        throw new HttpException('User successfully registered.', 201);
+      // Check Passwords
+      const checkPass = data.password === data.confirm_password;
+      if (checkPass) {
+        // Hash Password
+        const hashedPassword = await hashPassword(data.password);
+        // Create Model
+        const user = await this.usersService.create(data.email, hashedPassword);
+        if (user) {
+          // Send Mail
+          const resMail = await this.mailService.sendActivationMail({
+            link: 'https://google.com/',
+            to: data.email,
+          });
+          if (!resMail) {
+            throw new HttpException(
+              'The user has successfully registered, but no confirmation message has been sent.',
+              200,
+            );
+          }
+          throw new HttpException('User successfully registered.', 201);
+        } else {
+          throw new HttpException(
+            'An error occurred while creating the user',
+            500,
+          );
+        }
       } else {
-        throw new HttpException(
-          'An error occurred while creating the user',
-          500,
-        );
+        throw new HttpException('Passwords are not the same', 401);
       }
     } else {
       throw new HttpException('User with this email already exists', 409);
@@ -44,11 +63,7 @@ export class AuthService {
     const user = await this.usersService.findOne(data.email);
     if (user) {
       // Check Passwords
-      const checkRes = await checkPassword(
-        data.password,
-        data.confirm_password,
-        user.password,
-      );
+      const checkRes = await checkPassword(data.password, user.password);
       if (!checkRes) {
         throw new HttpException('Wrong email or password', 401);
       } else {

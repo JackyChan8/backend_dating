@@ -42,8 +42,4 @@ export class Users {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
-  }
 }

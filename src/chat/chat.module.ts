@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
-import { DialogModule } from './dialog/dialog.module';
-import { MessageModule } from './message/message.module';
+
+import { DialogModule } from './modules/dialog/dialog.module';
+import { MessageModule } from './modules/message/message.module';
+import { UsersModule } from 'src/users/users.module';
+
+import { ChatController } from './chat.controller';
+import { ChatService } from './chat.service';
 
 @Module({
-  imports: [DialogModule, MessageModule],
+  imports: [DialogModule, MessageModule, UsersModule],
   exports: [],
-  providers: [],
-  controllers: [],
+  providers: [ChatService],
+  controllers: [ChatController],
 })
 export class ChatModule {}

@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common';
 import { DialogService } from './dialog.service';
 import { dialogProviders } from './dialog.providers';
 import { DatabaseModule } from 'src/database/database.module';
-import { DialogController } from './dialog.controller';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  exports: [],
-  imports: [DatabaseModule],
-  controllers: [DialogController],
+  exports: [DialogService],
+  imports: [DatabaseModule, UsersModule],
+  controllers: [],
   providers: [...dialogProviders, DialogService],
 })
 export class DialogModule {}

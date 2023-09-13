@@ -20,6 +20,10 @@ export class AuthController {
     description: 'User successfully registered.',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Passwords are not the same',
+  })
+  @ApiResponse({
     status: 409,
     description: 'User with this email already exists',
   })

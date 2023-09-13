@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Users } from './models/users.entity';
+import { UserInterface } from './interfaces/user.interface';
 
 @Injectable()
 export class UsersService {
@@ -40,6 +41,14 @@ export class UsersService {
   async findOne(email: string): Promise<Users | null> {
     return this.usersRepository.findOneBy({
       email: email,
+    });
+  }
+
+  async findByID(userId: number): Promise<Users | null> {
+    return this.usersRepository.findOne({
+      where: {
+        id: userId,
+      },
     });
   }
 }

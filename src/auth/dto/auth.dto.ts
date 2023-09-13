@@ -6,6 +6,9 @@ export class SignUpDto {
 
   @ApiProperty()
   password: string;
+
+  @ApiProperty()
+  confirm_password: string;
 }
 
 export class SignInDto {
@@ -14,9 +17,6 @@ export class SignInDto {
 
   @ApiProperty()
   password: string;
-
-  @ApiProperty()
-  confirm_password: string;
 }
 
 export class SignInJwtDto {
