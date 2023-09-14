@@ -20,5 +20,6 @@ export class SignInDto {
 }
 
 export class SignInJwtDto {
+  statusCode: number;
   access_token: string;
 }

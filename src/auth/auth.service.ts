@@ -69,7 +69,10 @@ export class AuthService {
       } else {
         // Generate JWT
         const payload = { sub: user.id, email: user.email };
-        return { access_token: await this.jwtService.signAsync(payload) };
+        return {
+          statusCode: 200,
+          access_token: await this.jwtService.signAsync(payload),
+        };
       }
     } else {
       throw new HttpException('User with this email does not exist', 404);

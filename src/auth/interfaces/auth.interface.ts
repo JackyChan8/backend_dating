@@ -10,5 +10,6 @@ export interface AuthSignInInterface {
 }
 
 export interface AuthSignInJwt {
+  statusCode: number;
   access_token: string;
 }
