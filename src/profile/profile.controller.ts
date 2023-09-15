@@ -5,6 +5,8 @@ import {
   UseGuards,
   Request,
   Body,
+  Param,
+  Put,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -13,10 +15,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { AuthGuard } from 'src/auth/auth.guard';
-
 import { ProfileService } from './profile.service';
-import { CreateProfileDto } from './dto/profile.dto';
+import {
+  CreateProfileDto,
+  ProfileResDto,
+  UpdateProfileDto,
+} from './dto/profile.dto';
+
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags('profile')
 @Controller('profile')
@@ -48,14 +54,38 @@ export class ProfileController {
   }
 
   @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Profile successfully update',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Profile does not exist',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'An error occurred while updating the profile',
+  })
   @ApiOperation({ summary: 'Update Profile' })
   @ApiBearerAuth('JWT-auth')
-  @Post('update')
-  async update() {}
+  @Put('update')
+  async update(@Request() req: any, @Body() body: UpdateProfileDto) {
+    return await this.profileService.update(body, req.user.sub);
+  }
 
   @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Profile received successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile does not exist',
+  })
   @ApiOperation({ summary: 'Get Profile' })
   @ApiBearerAuth('JWT-auth')
-  @Get()
-  async get() {}
+  @Get(':id')
+  async get(@Param('id') userID: number): Promise<ProfileResDto> {
+    return await this.profileService.findOne(userID);
+  }
 }

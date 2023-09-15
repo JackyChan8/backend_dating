@@ -13,6 +13,9 @@ import {
   Character,
   FamilyStatus,
   Orientation,
+  Interests,
+  Looking,
+  Qualities,
 } from 'src/profile/types/profile';
 
 import { Photos } from './photo.entity';
@@ -23,18 +26,20 @@ export class Profiles {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    type: 'varchar',
-    length: 255,
-  })
-  firstName: string;
-
   @OneToOne(() => Users, { nullable: false })
   @JoinColumn()
   user: Users;
 
   @OneToMany(() => Photos, (photo) => photo.profile, { nullable: true })
   photos: Photos[];
+
+  // Основная Информация
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+  })
+  firstName: string;
 
   @Column({
     type: 'date',
@@ -49,6 +54,7 @@ export class Profiles {
   })
   sex: Sex;
 
+  // Личная Информация
   @Column({
     type: 'int',
     nullable: true,
@@ -66,16 +72,14 @@ export class Profiles {
   @Column({
     type: 'enum',
     enum: BodyBuild,
-    nullable: true,
-    default: null,
+    default: 'Не указывать',
   })
   bodyBuild: BodyBuild;
 
   @Column({
     type: 'enum',
     enum: EyeColor,
-    nullable: true,
-    default: null,
+    default: 'Не указывать',
   })
   eyeColor: EyeColor;
 
@@ -86,31 +90,58 @@ export class Profiles {
   })
   aboutMe: string;
 
-  // ??? Интерессы ???
+  @Column({
+    type: 'enum',
+    enum: Interests,
+    array: true,
+    nullable: false,
+  })
+  interests: Interests[];
 
   @Column({
     type: 'enum',
     enum: Character,
-    nullable: true,
-    default: null,
+    default: 'Не указывать',
   })
   character: Character;
 
   @Column({
     type: 'enum',
     enum: FamilyStatus,
-    nullable: true,
-    default: null,
+    default: 'Не указывать',
   })
   familyStatus: FamilyStatus;
 
   @Column({
     type: 'enum',
     enum: Orientation,
-    nullable: true,
-    default: null,
+    default: 'Не указывать',
   })
   orientation: Orientation;
 
-  // ??? Хочу Найти ???
+  // Хочу Найти
+  @Column({
+    type: 'enum',
+    enum: Looking,
+    array: true,
+    nullable: false,
+    default: ['Не важно'],
+  })
+  looking: Looking[];
+
+  @Column({
+    type: 'enum',
+    enum: Qualities,
+    array: true,
+    nullable: false,
+    default: ['Не важно'],
+  })
+  qualities: Qualities[];
+
+  @Column({
+    type: 'text',
+    nullable: true,
+    default: null,
+  })
+  partnerDesc: string;
 }

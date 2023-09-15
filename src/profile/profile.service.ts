@@ -1,9 +1,14 @@
 import { Injectable, Inject, HttpException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
-import { Profiles } from './models/profile.entity';
-import { ProfileCreateInterface } from './interfaces/profile.interface';
 import { UsersService } from 'src/users/users.service';
+
+import { Profiles } from './models/profile.entity';
+import {
+  ProfileCreateInterface,
+  ProfileResInterface,
+  ProfileUpdateInterface,
+} from './interfaces/profile.interface';
 
 @Injectable()
 export class ProfileService {
@@ -17,6 +22,44 @@ export class ProfileService {
     return await this.profileRepository.exist({
       where: { user: { id: userID } },
     });
+  }
+
+  async findOne(userID: number): Promise<ProfileResInterface> {
+    const profile = await this.profileRepository.findOneBy({
+      user: { id: userID },
+    });
+    if (!profile) {
+      throw new HttpException('Profile does not exist', 404);
+    }
+    return {
+      status: 200,
+      message: 'Profile received successfully',
+      data: profile,
+    };
+  }
+
+  async update(data: ProfileUpdateInterface, userID: number) {
+    // Check Exist Profile
+    const existProfile = await this.checkExist(userID);
+    if (existProfile) {
+      // Update Profile
+      const profile = await this.profileRepository
+        .createQueryBuilder()
+        .update(Profiles)
+        .set(data)
+        .where({ user: userID })
+        .execute();
+      if (profile.affected) {
+        throw new HttpException('Profile successfully update', 200);
+      } else {
+        throw new HttpException(
+          'An error occurred while updating the profile',
+          500,
+        );
+      }
+    } else {
+      throw new HttpException('Profile does not exist', 204);
+    }
   }
 
   async create(data: ProfileCreateInterface, userID: number) {
@@ -43,9 +86,13 @@ export class ProfileService {
             bodyBuild: data.bodyBuild,
             eyeColor: data.eyeColor,
             aboutMe: data.aboutMe,
+            interests: data.interests,
             character: data.character,
             familyStatus: data.familyStatus,
             orientation: data.orientation,
+            looking: data.looking,
+            qualities: data.qualities,
+            partnerDesc: data.partnerDesc,
           })
           .execute();
         if (profile) {

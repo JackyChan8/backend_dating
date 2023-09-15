@@ -5,6 +5,7 @@ export enum Sex {
 }
 
 export enum BodyBuild {
+  NOT_SPECIFY = 'Не указывать',
   SKINNY = 'Худое',
   AVERAGE = 'Среднее',
   MUSCULAR = 'Мускулистое',
@@ -12,6 +13,7 @@ export enum BodyBuild {
 }
 
 export enum EyeColor {
+  NOT_SPECIFY = 'Не указывать',
   BLUE = 'Голубые',
   GREY = 'Серые',
   GREEN = 'Зеленые',
@@ -22,13 +24,25 @@ export enum EyeColor {
   DARK_BROWN = 'Тёмно-карии',
 }
 
+export enum Interests {
+  ONE = 'Кино',
+  TWO = 'Прогулки',
+  THREE = 'Учиться',
+  FOUR = 'Играть в компьютер',
+  FIVE = 'Спорт',
+  SIX = 'Клубы',
+  SEVEN = 'Гулять',
+}
+
 export enum Character {
+  NOT_SPECIFY = 'Не указывать',
   CALM = 'Спокойный',
   BALANCED = 'Уровновешенный',
   IRASCIBLE = 'Вспыльчивый',
 }
 
 export enum FamilyStatus {
+  NOT_SPECIFY = 'Не указывать',
   FREE = 'Свободен(-на)',
   DIVORCED = 'Разведен(-а)',
   RELATIONSHIP = 'В отношениях',
@@ -36,7 +50,23 @@ export enum FamilyStatus {
 }
 
 export enum Orientation {
+  NOT_SPECIFY = 'Не указывать',
   HETERO = 'Гетеросексуальность',
   BI = 'Бисексуальность',
   HOMO = 'Гомосексуальность',
+}
+
+// Хочу Найти
+export enum Looking {
+  NEVER_MIND = 'Не важно',
+  MEN = 'Мужчину',
+  WOMAN = 'Женщину',
+  FRIEND = 'Друга',
+}
+
+export enum Qualities {
+  NEVER_MIND = 'Не важно',
+  CONFIDENCE = 'Уверенность',
+  RESPONSIBILITY = 'Ответственность',
+  HARD_WORK = 'Трудолюбие',
 }
