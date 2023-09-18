@@ -7,8 +7,6 @@ import {
 } from 'typeorm';
 import { Length, IsNotEmpty, IsEmail } from 'class-validator';
 
-import * as bcrypt from 'bcrypt';
-
 @Entity()
 export class Users {
   @PrimaryGeneratedColumn()
@@ -42,8 +40,4 @@ export class Users {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
-  }
 }

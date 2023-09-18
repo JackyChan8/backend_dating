@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     restart: always
-    image: postgres:latest
+    image: postgres:15.4-alpine
     container_name: postgres
     environment:
       - POSTGRES_DB=postgres
@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - database_dockerizing:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d/
+      # - ./db:/docker-entrypoint-initdb.d/
     ports:
       - '1234:5432'
 
@@ -25,6 +25,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
       - PORT=8000
+      # JWT
+      - SECRET_JWT=8X1RW3Bt3eRtTgk1O7JVKXj4DbbXua5CGOXWWulCibNWALC
     volumes:
       - ./src:/app/src
     ports:
