@@ -4,10 +4,19 @@ import {
   HttpException,
   HttpCode,
   Post,
+  Res,
+  Req,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { SignInDto, SignInJwtDto, SignUpDto } from './dto/auth.dto';
+import {
+  RefreshDto,
+  SignInDto,
+  SignInJwtDto,
+  SignOutDto,
+  SignUpDto,
+} from './dto/auth.dto';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('auth')
@@ -52,19 +61,72 @@ export class AuthController {
   @ApiOperation({ summary: 'User Authorization' })
   @Post('sign-in')
   @HttpCode(200)
-  async signIn(@Body() body: SignInDto): Promise<SignInJwtDto | HttpException> {
-    return await this.authService.signIn(body);
+  async signIn(
+    @Body() body: SignInDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SignInJwtDto> {
+    const resSignIn = await this.authService.signIn(body);
+    response.cookie('refresh-token', resSignIn.refresh_token, {
+      maxAge: 3600 * 24 * 7,
+      path: '/',
+      secure: false,
+      httpOnly: true,
+    });
+    return {
+      statusCode: resSignIn.statusCode,
+      access_token: resSignIn.access_token,
+    };
   }
 
-  @ApiOperation({ summary: 'User Logout' })
-  @Post('logout')
-  async logout() {
-    await this.authService.logout();
+  @ApiResponse({
+    status: 200,
+    description: 'The user has successfully sign out',
+  })
+  @ApiOperation({ summary: 'User Sign Out' })
+  @Post('sign-out')
+  async signOut(
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SignOutDto> {
+    response.cookie('refresh-token', '', {
+      maxAge: -1,
+      path: '/',
+      secure: false,
+      httpOnly: true,
+    });
+    return {
+      statusCode: 200,
+    };
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'The user has successfully refresh token',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'An error occurred while refresh tokens',
+  })
   @ApiOperation({ summary: 'User Refresh JWT Token' })
   @Post('refresh')
-  async refresh() {
-    await this.authService.refresh();
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<RefreshDto> {
+    const refreshToken: string = request.cookies['refresh-token'];
+    if (refreshToken.length === 0) {
+      throw new HttpException('Token refresh is empty', 500);
+    }
+    const resRefresh = await this.authService.refresh(refreshToken);
+    response.cookie('refresh-token', resRefresh.refresh_token, {
+      maxAge: 3600 * 24 * 7,
+      path: '/',
+      secure: false,
+      httpOnly: true,
+    });
+
+    return {
+      statusCode: resRefresh.statusCode,
+      access_token: resRefresh.access_token,
+    };
   }
 }

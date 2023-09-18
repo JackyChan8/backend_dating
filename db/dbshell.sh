@@ -14,6 +14,14 @@ psql -v ON_ERROR_STOP=1 --username "postgres" --dbname "postgres" <<-EOSQL
         updated_at TIMESTAMP NOT NULL DEFAULT now()
     );
 
+    CREATE TABLE IF NOT EXISTS refresh_tokens(
+        id SERIAL PRIMARY KEY NOT NULL,
+        user_id INTEGER,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
     CREATE TABLE IF NOT EXISTS dialogs(
         id SERIAL PRIMARY KEY NOT NULL,
         author_id INTEGER NOT NULL,

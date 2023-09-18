@@ -39,3 +39,12 @@ export class SignInJwtDto {
   statusCode: number;
   access_token: string;
 }
+
+export class SignOutDto {
+  statusCode: number;
+}
+
+export class RefreshDto {
+  statusCode: number;
+  access_token: string;
+}
