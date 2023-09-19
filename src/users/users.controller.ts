@@ -67,8 +67,10 @@ export class UsersController {
     )
     file: Express.Multer.File,
   ) {
+    // Get User
     const user = await this.userService.findByID(req.user.sub);
     if (user) {
+      // Add Photo
       const addPhoto = await this.photoService.create(user, file.filename);
       if (addPhoto) {
         return {
@@ -87,13 +89,22 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 201,
+    description: 'Photos uploaded successfully',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'An error occurred while add photos to database | An error occurred while add photos',
+  })
   @ApiOperation({ summary: 'Uploads Photo' })
   @ApiBearerAuth('JWT-auth')
   @Post('photos/upload')
   @ApiConsumes('multipart/form-data')
   @UploadMultiFile()
-  @UseInterceptors(FilesInterceptor('files'))
-  uploadFiles(
+  @UseInterceptors(FilesInterceptor('files', 20, { storage }))
+  async uploadFiles(
     @Request() req: any,
     @UploadedFiles(
       new ParseFilePipeBuilder()
@@ -106,7 +117,25 @@ export class UsersController {
     )
     files: Array<Express.Multer.File>,
   ) {
-    console.log('req.user: ', req.user);
-    console.log(files);
+    // Get User
+    const user = await this.userService.findByID(req.user.sub);
+    if (user) {
+      // Add Photos
+      const filenames = files.map((f) => f.filename);
+      const addPhotos = await this.photoService.createMultiple(user, filenames);
+      if (addPhotos) {
+        return {
+          statusCode: 201,
+          message: 'Photos uploaded successfully',
+        };
+      } else {
+        throw new HttpException(
+          'An error occurred while add photos to database',
+          500,
+        );
+      }
+    } else {
+      throw new HttpException('An error occurred while add photos', 500);
+    }
   }
 }
