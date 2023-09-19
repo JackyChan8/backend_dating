@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Length, IsNotEmpty, IsEmail } from 'class-validator';
 
 import { Photos } from 'src/users/modules/photo/models/photo.entity';
+import { Profiles } from 'src/profile/models/profile.entity';
 
 @Entity()
 export class Users {
@@ -37,6 +40,10 @@ export class Users {
 
   @Column({ default: false })
   confirm_email: boolean;
+
+  @OneToOne(() => Profiles, (profile) => profile.user, { nullable: true })
+  @JoinColumn()
+  profile: Profiles;
 
   @OneToMany(() => Photos, (photo) => photo.user, { nullable: true })
   photos: Photos[];

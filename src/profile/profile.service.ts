@@ -96,6 +96,17 @@ export class ProfileService {
           })
           .execute();
         if (profile) {
+          // Update Field profile in User Model
+          const isUpdate = await this.usersService.update(
+            userID,
+            profile.raw[0],
+          );
+          if (!isUpdate) {
+            throw new HttpException(
+              'An error occurred while updating user',
+              500,
+            );
+          }
           throw new HttpException('Profile successfully created', 200);
         } else {
           throw new HttpException(

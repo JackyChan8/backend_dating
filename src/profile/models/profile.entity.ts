@@ -24,7 +24,7 @@ export class Profiles {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Users, { nullable: false })
+  @OneToOne(() => Users, (user) => user.profile, { nullable: false })
   @JoinColumn()
   user: Users;
 

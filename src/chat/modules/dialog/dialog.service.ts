@@ -44,13 +44,40 @@ export class DialogService {
   async getAll(userID: number): Promise<Dialogs | Dialogs[]> {
     return await this.dialogRepository.find({
       where: [{ author: { id: userID } }, { partner: { id: userID } }],
-      relations: ['author', 'partner'],
+      relations: [
+        'author',
+        'partner',
+        'author.photos',
+        'partner.photos',
+        'author.profile',
+        'partner.profile',
+        'messages',
+      ],
       select: {
+        id: true,
         author: {
           id: true,
+          photos: {
+            id: true,
+            filename: true,
+          },
+          profile: {
+            firstName: true,
+          },
         },
         partner: {
           id: true,
+          photos: {
+            id: true,
+            filename: true,
+          },
+          profile: {
+            firstName: true,
+          },
+        },
+        lastMessage: true,
+        messages: {
+          read: true,
         },
       },
     });

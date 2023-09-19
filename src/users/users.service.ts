@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
+
 import { Users } from './models/users.entity';
+import { Profiles } from 'src/profile/models/profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +33,22 @@ export class UsersService {
       })
       .execute();
     if (user) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async update(userID: number, profile: Profiles): Promise<boolean> {
+    const isUpdate = (
+      await this.usersRepository.update(
+        { id: userID },
+        {
+          profile: profile,
+        },
+      )
+    ).affected;
+    if (isUpdate) {
       return true;
     } else {
       return false;
