@@ -1,4 +1,6 @@
+import { join } from 'path';
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -7,7 +9,17 @@ import { ChatModule } from './chat/chat.module';
 import { ProfileModule } from './profile/profile.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ProfileModule, MailModule, ChatModule],
+  imports: [
+    // Static Files
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'storage'),
+    }),
+    AuthModule,
+    UsersModule,
+    ProfileModule,
+    MailModule,
+    ChatModule,
+  ],
   controllers: [],
   providers: [],
 })

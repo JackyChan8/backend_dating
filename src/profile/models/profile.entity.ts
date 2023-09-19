@@ -2,7 +2,6 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   OneToOne,
   JoinColumn,
 } from 'typeorm';
@@ -18,7 +17,6 @@ import {
   Qualities,
 } from 'src/profile/types/profile';
 
-import { Photos } from './photo.entity';
 import { Users } from 'src/users/models/users.entity';
 
 @Entity()
@@ -29,9 +27,6 @@ export class Profiles {
   @OneToOne(() => Users, { nullable: false })
   @JoinColumn()
   user: Users;
-
-  @OneToMany(() => Photos, (photo) => photo.profile, { nullable: true })
-  photos: Photos[];
 
   // Основная Информация
   @Column({

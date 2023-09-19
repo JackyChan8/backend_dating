@@ -4,8 +4,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Length, IsNotEmpty, IsEmail } from 'class-validator';
+
+import { Photos } from 'src/users/modules/photo/models/photo.entity';
 
 @Entity()
 export class Users {
@@ -34,6 +37,9 @@ export class Users {
 
   @Column({ default: false })
   confirm_email: boolean;
+
+  @OneToMany(() => Photos, (photo) => photo.user, { nullable: true })
+  photos: Photos[];
 
   @CreateDateColumn()
   created_at: Date;

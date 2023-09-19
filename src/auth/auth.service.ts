@@ -94,10 +94,10 @@ export class AuthService {
   ): Promise<AuthGenerateTokens> {
     const payload = { sub: userId, email: email };
     const accessToken: string = await this.jwtService.signAsync(payload, {
-      expiresIn: '1m',
+      expiresIn: '24h',
     });
     const refreshToken: string = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
+      expiresIn: '24h',
     });
 
     const resAddRefreshToken = await this.addRefreshToken({
