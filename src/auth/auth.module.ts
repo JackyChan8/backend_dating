@@ -8,6 +8,7 @@ import { UsersModule } from 'src/users/users.module';
 import { MailModule } from 'src/mail/mail.module';
 
 @Module({
+  exports: [AuthService],
   imports: [
     UsersModule,
     MailModule,

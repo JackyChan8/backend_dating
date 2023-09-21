@@ -1,5 +1,7 @@
 import { Injectable, HttpException } from '@nestjs/common';
 
+import { Socket } from 'socket.io';
+
 import { DialogService } from './modules/dialog/dialog.service';
 import { MessageService } from './modules/message/message.service';
 
@@ -107,5 +109,19 @@ export class ChatService {
     } else {
       return { status: 404, message: 'Dialog does not exist' };
     }
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    const auth_token = socket.handshake.headers.authorization;
+    console.log('auth_token: ', auth_token);
+    // // get the token itself without "Bearer"
+    // auth_token = auth_token.split(' ')[1];
+
+    // const user = this.authService.getUserFromAuthenticationToken(auth_token);
+
+    // if (!user) {
+    //   throw new WsException('Invalid credentials.');
+    // }
+    // return user;
   }
 }

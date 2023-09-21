@@ -21,16 +21,20 @@ export class MessageService {
   async getAll(dialogID: number): Promise<Messages | Messages[]> {
     return await this.messageRepository.find({
       where: { dialog: { id: dialogID } },
-      relations: ['author'],
+      relations: ['author', 'author.photos'],
       select: {
         id: true,
         text: true,
         read: true,
         created_at: true,
-        author: { id: true },
+        author: {
+          id: true,
+          photos: { id: true, filename: true, isAvatar: true },
+        },
       },
       order: {
         created_at: 'ASC',
+        author: { photos: { id: 'ASC' } },
       },
     });
   }

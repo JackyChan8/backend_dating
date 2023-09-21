@@ -52,6 +52,7 @@ export class DialogService {
         'author.profile',
         'partner.profile',
         'messages',
+        'messages.author',
       ],
       select: {
         id: true,
@@ -60,6 +61,7 @@ export class DialogService {
           photos: {
             id: true,
             filename: true,
+            isAvatar: true,
           },
           profile: {
             firstName: true,
@@ -70,6 +72,7 @@ export class DialogService {
           photos: {
             id: true,
             filename: true,
+            isAvatar: true,
           },
           profile: {
             firstName: true,
@@ -78,7 +81,13 @@ export class DialogService {
         lastMessage: true,
         messages: {
           read: true,
+          author: {
+            id: true,
+          },
         },
+      },
+      order: {
+        created_at: 'ASC',
       },
     });
   }

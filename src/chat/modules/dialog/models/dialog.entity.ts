@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
 
 import { Users } from 'src/users/models/users.entity';
@@ -28,6 +29,9 @@ export class Dialogs {
 
   @OneToMany(() => Messages, (msg) => msg.dialog, { nullable: true })
   messages: Messages;
+
+  @CreateDateColumn()
+  created_at: Date;
 
   async length() {
     return Dialogs.length;

@@ -1,4 +1,8 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { UsersService } from 'src/users/users.service';
 
@@ -15,6 +19,7 @@ import { hashPassword, checkPassword } from 'src/utils/bcrypt/bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 
+import { jwtConstants } from './constants';
 import db from '../db';
 
 @Injectable()
@@ -71,7 +76,6 @@ export class AuthService {
       } else {
         const { access_token, refresh_token } = await this.generateTokens(
           user.id,
-          user.email,
         );
         if (access_token.length === 0 || refresh_token.length === 0) {
           throw new HttpException('Error in generateTokens', 500);
@@ -88,11 +92,8 @@ export class AuthService {
     }
   }
 
-  async generateTokens(
-    userId: number,
-    email: string,
-  ): Promise<AuthGenerateTokens> {
-    const payload = { sub: userId, email: email };
+  async generateTokens(userId: number): Promise<AuthGenerateTokens> {
+    const payload = { sub: userId };
     const accessToken: string = await this.jwtService.signAsync(payload, {
       expiresIn: '24h',
     });
@@ -140,7 +141,6 @@ export class AuthService {
 
     const { access_token, refresh_token } = await this.generateTokens(
       resGetUserByRefreshToken[0].id,
-      resGetUserByRefreshToken[0].email,
     );
     if (access_token.length === 0 || refresh_token.length === 0) {
       throw new HttpException('Error in generateTokens', 500);
@@ -151,5 +151,20 @@ export class AuthService {
       access_token,
       refresh_token,
     };
+  }
+
+  // Check JWT
+  async getUserFromAuthenticationToken(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+      const userID = payload.sub;
+      if (userID) {
+        return this.usersService.findByID(userID);
+      }
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }

@@ -6,11 +6,13 @@ import { UsersModule } from 'src/users/users.module';
 
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [DialogModule, MessageModule, UsersModule],
+  imports: [DialogModule, MessageModule, UsersModule, AuthModule],
   exports: [],
-  providers: [ChatService],
+  providers: [ChatService, ChatGateway],
   controllers: [ChatController],
 })
 export class ChatModule {}

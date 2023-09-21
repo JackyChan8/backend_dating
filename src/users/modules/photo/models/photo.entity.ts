@@ -10,6 +10,9 @@ export class Photos {
   @Column()
   filename: string;
 
+  @Column({ default: false })
+  isAvatar: boolean;
+
   @ManyToOne(() => Users, (user) => user.photos)
   user: Users;
 }
