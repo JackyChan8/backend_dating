@@ -21,7 +21,7 @@ export class MessageService {
   async getAll(dialogID: number): Promise<Messages | Messages[]> {
     return await this.messageRepository.find({
       where: { dialog: { id: dialogID } },
-      relations: ['author', 'author.photos'],
+      relations: ['author', 'author.photos', 'dialog'],
       select: {
         id: true,
         text: true,
@@ -31,12 +31,57 @@ export class MessageService {
           id: true,
           photos: { id: true, filename: true, isAvatar: true },
         },
+        dialog: { id: true },
       },
       order: {
         created_at: 'ASC',
         author: { photos: { id: 'ASC' } },
       },
     });
+  }
+
+  async getOne(
+    dialogId: number,
+    messageId: number,
+  ): Promise<Messages | Messages[]> {
+    const message = await this.messageRepository.find({
+      where: { id: messageId, dialog: { id: dialogId } },
+      relations: [
+        'author',
+        'author.photos',
+        'dialog',
+        'dialog.author',
+        'dialog.partner',
+      ],
+      select: {
+        id: true,
+        text: true,
+        read: true,
+        created_at: true,
+        author: {
+          id: true,
+          photos: { id: true, filename: true, isAvatar: true },
+        },
+        dialog: {
+          id: true,
+          author: {
+            id: true,
+          },
+          partner: {
+            id: true,
+          },
+        },
+      },
+      order: {
+        created_at: 'ASC',
+        author: { photos: { id: 'ASC' } },
+      },
+    });
+    if (message.length) {
+      return message[0];
+    } else {
+      return message;
+    }
   }
 
   async create(data: MessageInterface): Promise<MessageResInterface> {
@@ -55,10 +100,12 @@ export class MessageService {
           author: user,
         })
         .execute();
+      console.log('message: ', message);
       if (message) {
         return {
           status: 201,
           message: 'Message created successfully',
+          data: await this.getOne(data.dialog, message.identifiers[0].id),
         };
       } else {
         return {
@@ -72,5 +119,32 @@ export class MessageService {
         message: 'An error occurred while creating the message',
       };
     }
+  }
+
+  async changeReadStatus(dialogId: number, partnerId: number) {
+    const messages = await this.messageRepository.find({
+      relations: ['dialog', 'author'],
+      where: {
+        dialog: {
+          id: dialogId,
+        },
+        author: {
+          id: partnerId,
+        },
+      },
+      select: {
+        text: true,
+        read: true,
+        dialog: { id: true },
+        author: { id: true },
+      },
+    });
+    console.log('messages - changeReadStatus: ', messages);
+    // const messages = (
+    //   await this.messageRepository.update(
+    //     { dialog: { id: dialogId } },
+    //     {  }
+    //   )
+    // )
   }
 }

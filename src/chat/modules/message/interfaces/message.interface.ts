@@ -9,5 +9,6 @@ export interface MessageInterface {
 export interface MessageResInterface {
   status: number;
   message: string;
-  data?: Messages;
+  data?: Messages | Messages[];
+  id?: number;
 }
