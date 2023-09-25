@@ -11,7 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 import { CLIENT_URI } from './constants';
-import { MessageCreateInterface } from './interfaces/chat.interface';
+import { MessageCreateInterface, MessagesReadInterface } from './interfaces/chat.interface';
 
 import { ChatService } from './chat.service';
 import { AuthService } from 'src/auth/auth.service';
@@ -42,23 +42,29 @@ export class ChatGateway
   afterInit(server: Server) {
     console.log('afterInit');
     console.log(server);
+
+    // Middleware Check Token
+    server.use(async (socket, next) => {
+      console.log('Middleware');
+      let user;
+      const token = socket.handshake.headers.authorization;
+      // Проверка токена
+      if (token) {
+        user = await this.authService.getUserFromAuthenticationToken(token);
+        if (user) {
+          const socketId = socket.id;
+          users[socketId] = user.id;
+        } else {
+          return next(new Error('Invalid credentials'));
+        }
+      }
+      next();
+    });
   }
 
   // подключение
   async handleConnection(socket: Socket) {
     console.log('handleConnection');
-    const token = socket.handshake.headers.authorization;
-    let user;
-    // Проверка токена
-    if (token) {
-      user = await this.authService.getUserFromAuthenticationToken(token);
-      if (!user) {
-        throw new WsException('Invalid credentials.');
-      }
-      const socketId = socket.id;
-      users[socketId] = user?.id;
-    }
-
     console.log(`Socket ${socket.id} connected.`);
   }
 
@@ -79,11 +85,11 @@ export class ChatGateway
     // this.server.emit('messages', messages);
   }
 
-  // // удаление всех сообщений
-  // @SubscribeMessage('messages:clear')
-  // async handleMessagesClear(): Promise<void> {
-  //   console.log('handleMessagesClear - messages:clear');
-  // }
+  // удаление всех сообщений
+  @SubscribeMessage('messages:clear')
+  async handleMessagesClear(): Promise<void> {
+    console.log('handleMessagesClear - messages:clear');
+  }
 
   // создание сообщения
   @SubscribeMessage('message:post')
@@ -103,42 +109,49 @@ export class ChatGateway
       if (res.status === 201) {
         // Обновление последнего сообщения в диалоге
         await this.dialogService.update(payload.dialog, payload.text);
-        // Получения сообщения
-        console.log('Success Created Message');
-        console.log('res.data: ', res.data);
         // Отправка сообщения на клиент
         this.server.emit('server:new_message', res.data);
       } else {
         // Отправка сообщения об ошибке
+        this.server.emit('message_error', {
+          userId: payload.author,
+          message: 'Произошла ошибка при создании сообщения',
+        })
       }
     } else {
-      throw new WsException('Invalid credentials.');
+      // Отправка сообщения об ошибке
+      this.server.emit('message_error', {
+        userId: payload.author,
+        message: 'Вас нет в диалоге',
+      })
     }
   }
 
-  // // обновление сообщения
-  // @SubscribeMessage('message:put')
-  // async handleMessagePut(
-  //   @MessageBody()
-  //   payload: // { id: number, text: string }
-  //   any,
-  // ): Promise<void> {
-  //   console.log('handleMessagePut - message:put', payload);
-  //   // const updatedMessage = await this.appService.updateMessage(payload);
-  //   // this.server.emit('message:put', updatedMessage);
-  //   // this.handleMessagesGet();
-  // }
-
-  // // удаление сообщения
-  // @SubscribeMessage('message:delete')
-  // async handleMessageDelete(
-  //   @MessageBody()
-  //   payload: // { id: number }
-  //   any,
-  // ) {
-  //   console.log('handleMessageDelete - message:delete', payload);
-  //   // const removedMessage = await this.appService.removeMessage(payload);
-  //   // this.server.emit('message:delete', removedMessage);
-  //   // this.handleMessagesGet();
-  // }
+  @SubscribeMessage('messages:read')
+  async handleMessageRead(
+    @MessageBody()
+    payload: MessagesReadInterface,
+  ) {
+    console.log('handleMessageRead - messages:read: ', payload);
+    // Проверка входит ли Пользователь в диалог
+    const checkInDialog = await this.dialogService.checkExistByID(
+      payload.dialog,
+      payload.user,
+    );
+    if (checkInDialog) {
+      const res = await this.messageService.changeReadStatus(payload.dialog, payload.user);
+      if (res) {
+        this.server.emit('server:read_message', {
+          dialog: payload.dialog,
+          user: payload.user,
+        });
+      }
+    } else {
+      // Отправка сообщения об ошибке
+      this.server.emit('message_error', {
+        userId: payload.user,
+        message: 'Вас нет в диалоге',
+      })
+    }
+  }
 }

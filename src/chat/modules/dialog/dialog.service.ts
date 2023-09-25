@@ -41,55 +41,55 @@ export class DialogService {
     return this.dialogRepository.findOneBy({ id: dialogID });
   }
 
-  async getAll(userID: number): Promise<Dialogs | Dialogs[]> {
-    return await this.dialogRepository.find({
-      where: [{ author: { id: userID } }, { partner: { id: userID } }],
-      relations: [
-        'author',
-        'partner',
-        'author.photos',
-        'partner.photos',
-        'author.profile',
-        'partner.profile',
-        'messages',
-        'messages.author',
-      ],
+  async getPartnerDialog(dialogId: number) {
+    const dialog = await this.dialogRepository.findOne({
+      relations: ['author', 'partner'],
+      where: { id: dialogId },
       select: {
-        id: true,
-        author: {
-          id: true,
-          photos: {
-            id: true,
-            filename: true,
-            isAvatar: true,
-          },
-          profile: {
-            firstName: true,
-          },
-        },
-        partner: {
-          id: true,
-          photos: {
-            id: true,
-            filename: true,
-            isAvatar: true,
-          },
-          profile: {
-            firstName: true,
-          },
-        },
-        lastMessage: true,
-        messages: {
-          read: true,
-          author: {
-            id: true,
-          },
-        },
+        author: { id: true },
+        partner: { id: true },
       },
-      order: {
-        created_at: 'ASC',
-      },
-    });
+    })
+    return dialog;
+  }
+
+  async getAll(userID: number): Promise<Dialogs | Dialogs[]> {
+    const dialogs = await this.dialogRepository
+    .createQueryBuilder('dialogs')
+    .leftJoinAndSelect('dialogs.author', 'author')
+    .leftJoinAndSelect('dialogs.partner', 'partner')
+    .leftJoinAndSelect('author.photos', 'photos.author')
+    .leftJoinAndSelect('author.profile', 'profile.author')
+    .leftJoinAndSelect('partner.photos', 'photos.partner')
+    .leftJoinAndSelect('partner.profile', 'profile.partner')
+    .leftJoinAndSelect('dialogs.messages', 'messages')
+    .select(
+      [
+        'dialogs.id',
+        'dialogs.lastMessage',
+        'dialogs.author',
+        'dialogs.partner',
+        'author.id',
+        'partner.id',
+        'photos.author',
+        'photos.partner',
+        'profile.author.firstName',
+        'profile.partner.firstName',
+      ]
+    )
+    .where('author.id = :userId', { userId: userID })
+    .orWhere('partner.id = :userId', { userId: userID })
+    .loadRelationCountAndMap(
+      'dialogs.unreadCount',
+      'dialogs.messages',
+      'message',
+      (qb) => qb
+      .where('message.author.id != :userId', { userId: userID })
+      .andWhere('message.read = false')
+    )
+    .getMany();
+
+    return dialogs;
   }
 
   async update(dialogID: number, message: string) {

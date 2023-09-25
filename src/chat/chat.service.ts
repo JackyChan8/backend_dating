@@ -110,7 +110,6 @@ export class ChatService {
       return { status: 404, message: 'Dialog does not exist' };
     }
   }
-
   async getUserFromSocket(socket: Socket) {
     const auth_token = socket.handshake.headers.authorization;
     console.log('auth_token: ', auth_token);

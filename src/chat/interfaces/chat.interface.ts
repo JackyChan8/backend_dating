@@ -22,3 +22,8 @@ export interface GetMessagesInterface {
   dialogID: number;
   userID: number;
 }
+
+export interface MessagesReadInterface {
+  user: number;
+  dialog: number;
+}

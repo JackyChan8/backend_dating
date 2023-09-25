@@ -121,30 +121,22 @@ export class MessageService {
     }
   }
 
-  async changeReadStatus(dialogId: number, partnerId: number) {
-    const messages = await this.messageRepository.find({
-      relations: ['dialog', 'author'],
-      where: {
-        dialog: {
-          id: dialogId,
-        },
-        author: {
-          id: partnerId,
-        },
-      },
-      select: {
-        text: true,
-        read: true,
-        dialog: { id: true },
-        author: { id: true },
-      },
-    });
-    console.log('messages - changeReadStatus: ', messages);
-    // const messages = (
-    //   await this.messageRepository.update(
-    //     { dialog: { id: dialogId } },
-    //     {  }
-    //   )
-    // )
+  async changeReadStatus(dialogId: number, userId: number): Promise<boolean> {
+    let partnerId;
+    const dialog = await this.dialogService.getPartnerDialog(dialogId);
+    if (dialog) {
+      partnerId = dialog.author.id === userId ? dialog.partner.id : dialog.author.id;
+    }
+    const messages = (
+      await this.messageRepository.update(
+        { dialog: { id: dialogId }, author: { id: partnerId }},
+        { read: true, }
+      )
+    ).affected
+    if (messages) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

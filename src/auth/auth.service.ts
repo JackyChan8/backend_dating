@@ -164,7 +164,7 @@ export class AuthService {
         return this.usersService.findByID(userID);
       }
     } catch {
-      throw new UnauthorizedException();
+      return;
     }
   }
 }
