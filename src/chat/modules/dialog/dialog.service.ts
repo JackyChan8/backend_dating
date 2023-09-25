@@ -99,7 +99,6 @@ export class DialogService {
         { lastMessage: message },
       )
     ).affected;
-    console.log('post: ', post);
     if (post === 1) {
       return true;
     } else {

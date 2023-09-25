@@ -6,17 +6,21 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { CLIENT_URI } from './constants';
-import { MessageCreateInterface, MessagesReadInterface } from './interfaces/chat.interface';
+import { CLIENT_URI } from 'src/constants';
+import { TypeNotification } from 'src/notification/types/notification';
+import {
+  MessageCreateInterface,
+  MessagesReadInterface,
+} from './interfaces/chat.interface';
 
-import { ChatService } from './chat.service';
 import { AuthService } from 'src/auth/auth.service';
 import { MessageService } from './modules/message/message.service';
 import { DialogService } from './modules/dialog/dialog.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { ProfileService } from 'src/profile/profile.service';
 
 const users: Record<string, number> = {};
 
@@ -32,16 +36,16 @@ export class ChatGateway
 {
   constructor(
     private readonly authService: AuthService,
-    private readonly chatService: ChatService,
     private readonly dialogService: DialogService,
     private readonly messageService: MessageService,
+    private readonly notifyService: NotificationService,
+    private readonly profileService: ProfileService,
   ) {}
   @WebSocketServer()
   server: Server;
 
   afterInit(server: Server) {
-    console.log('afterInit');
-    console.log(server);
+    console.log('afterInit ChatGateway');
 
     // Middleware Check Token
     server.use(async (socket, next) => {
@@ -64,31 +68,51 @@ export class ChatGateway
 
   // подключение
   async handleConnection(socket: Socket) {
-    console.log('handleConnection');
+    console.log('handleConnection - ChatGateway');
     console.log(`Socket ${socket.id} connected.`);
   }
 
   // отключение
   async handleDisconnect(client: Socket) {
-    console.log('handleDisconnect');
+    console.log('handleDisconnect - ChatGateway');
     const socketId = client.id;
     delete users[socketId];
 
     client.broadcast.emit('log', `${socketId} disconnected`);
   }
 
-  // получение всех сообщений
-  @SubscribeMessage('messages:get')
-  async handleMessagesGet(): Promise<void> {
-    console.log('handleMessagesGet - messages:get');
-    // const messages = await this.appService.getMessages();
-    // this.server.emit('messages', messages);
-  }
-
-  // удаление всех сообщений
-  @SubscribeMessage('messages:clear')
-  async handleMessagesClear(): Promise<void> {
-    console.log('handleMessagesClear - messages:clear');
+  /**
+   * @param {number} dialogId Dialog Identificator
+   * @param {number} authorId User Identificator
+   * @returns {void} Undefined
+   **/
+  async notification(dialogId: number, authorId: number): Promise<void> {
+    const chatNewMessage = 'Вам пришло сообщение от пользователя';
+    try {
+      // Получаем ID партнера в диалоге
+      let partnerId;
+      const dialog = await this.dialogService.getPartnerDialog(dialogId);
+      if (dialog) {
+        partnerId =
+          dialog.author.id === authorId ? dialog.partner.id : dialog.author.id;
+        
+        // Получаем Имя пользователя
+        const profile = await this.profileService.getFirstName(authorId);
+        if (profile) {
+          let text = `${chatNewMessage} ${profile.firstName}`;
+          // Создаем уведомление
+          await this.notifyService.create({
+            author: { id: authorId, firstName: profile.firstName },
+            dialogId: dialogId,
+            partnerId: partnerId,
+            type: TypeNotification.CHAT,
+            text: text,
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Error notification function: ', err);
+    }
   }
 
   // создание сообщения
@@ -111,19 +135,21 @@ export class ChatGateway
         await this.dialogService.update(payload.dialog, payload.text);
         // Отправка сообщения на клиент
         this.server.emit('server:new_message', res.data);
+        // Уведолмение
+        this.notification(payload.dialog, payload.author);
       } else {
         // Отправка сообщения об ошибке
         this.server.emit('message_error', {
           userId: payload.author,
           message: 'Произошла ошибка при создании сообщения',
-        })
+        });
       }
     } else {
       // Отправка сообщения об ошибке
       this.server.emit('message_error', {
         userId: payload.author,
         message: 'Вас нет в диалоге',
-      })
+      });
     }
   }
 
@@ -139,7 +165,10 @@ export class ChatGateway
       payload.user,
     );
     if (checkInDialog) {
-      const res = await this.messageService.changeReadStatus(payload.dialog, payload.user);
+      const res = await this.messageService.changeReadStatus(
+        payload.dialog,
+        payload.user,
+      );
       if (res) {
         this.server.emit('server:read_message', {
           dialog: payload.dialog,
@@ -151,7 +180,7 @@ export class ChatGateway
       this.server.emit('message_error', {
         userId: payload.user,
         message: 'Вас нет в диалоге',
-      })
+      });
     }
   }
 }

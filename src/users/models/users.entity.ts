@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Length, IsNotEmpty, IsEmail } from 'class-validator';
 
+import { Notification } from 'src/notification/models/notification.entity'
 import { Photos } from 'src/users/modules/photo/models/photo.entity';
 import { Profiles } from 'src/profile/models/profile.entity';
 
@@ -47,6 +48,11 @@ export class Users {
 
   @OneToMany(() => Photos, (photo) => photo.user, { nullable: true })
   photos: Photos[];
+
+  @OneToMany(() => Notification, (notification) => notification.user, { nullable: true })
+  notifications: Notification[];
+
+  
 
   @CreateDateColumn()
   created_at: Date;

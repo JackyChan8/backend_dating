@@ -100,7 +100,6 @@ export class MessageService {
           author: user,
         })
         .execute();
-      console.log('message: ', message);
       if (message) {
         return {
           status: 201,

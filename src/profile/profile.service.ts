@@ -119,4 +119,15 @@ export class ProfileService {
       }
     }
   }
+
+  async getFirstName(userId: number): Promise<Profiles | null> {
+    const profile = await this.profileRepository.findOne({
+      where: { user: { id: userId } },
+      select: {
+        id: true,
+        firstName: true,
+      }
+    })
+    return profile;
+  }
 }

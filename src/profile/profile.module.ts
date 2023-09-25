@@ -8,7 +8,7 @@ import { ProfileController } from './profile.controller';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  exports: [],
+  exports: [ProfileService],
   imports: [DatabaseModule, UsersModule],
   controllers: [ProfileController],
   providers: [...profileProviders, ProfileService],
